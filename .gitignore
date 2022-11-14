@@ -1,2 +1,8 @@
 scripts/cache/*
 !scripts/cache/.gitkeep
+data/cache/*
+!data/cache/.gitkeep
+data/cache-wiki-item-dump/*
+!data/cache-wiki-item-dump/.gitkeep
+data/cache-wiki-item-dump-404/*
+!data/cache-wiki-item-dump-404/.gitkeep

@@ -30,3 +30,9 @@ echo 1
 
 ## Examples of scripts
 scripts/cache/sophox/osm2rdf/osm2rdf.py --help
+
+# strange, this command try use > 10GB ram for a 1MB .osm.pbf file (Sao Tome and Principe)
+scripts/cache/sophox/osm2rdf/osm2rdf.py parse data/cache/osm-data-test.osm.pbf data/cache/
+
+
+# https://wiki.openstreetmap.org/wiki/Special:EntityData/Q2.nt

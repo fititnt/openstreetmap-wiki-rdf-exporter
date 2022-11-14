@@ -27,7 +27,7 @@ SOPOX_LOCAL="$ROOTDIR/scripts/cache/sophox"
 
 # Test data, < 1MB
 OSM_PBF_TEST_DOWNLOAD="https://download.geofabrik.de/africa/sao-tome-and-principe-latest.osm.pbf"
-OSM_PBF_TEST_FILE="$ROOTDIR/scripts/cache/osm-data-test.osm.pbf"
+OSM_PBF_TEST_FILE="$ROOTDIR/data/cache/osm-data-test.osm.pbf"
 
 #### Fancy colors constants - - - - - - - - - - - - - - - - - - - - - - - - - -
 tty_blue=$(tput setaf 4)
@@ -115,7 +115,7 @@ data_test_download() {
 }
 
 #### main ______________________________________________________________________
-echo "TODO"
+# echo "TODO"
 
 gh_repo_sync_pull_sophox
 python_requeriments_sophox
