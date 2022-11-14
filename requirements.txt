@@ -1,0 +1,3 @@
+
+# rdfpipe cli, used to format RDF/Turtle for nice git diffs
+rdflib>=6.0.0

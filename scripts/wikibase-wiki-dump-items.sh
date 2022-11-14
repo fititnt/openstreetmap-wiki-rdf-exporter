@@ -8,7 +8,7 @@
 #
 #       OPTIONS:  ---
 #
-#  REQUIREMENTS:  - git
+#  REQUIREMENTS:  - rdfpipe (pip install rdflib)
 #          BUGS:  ---
 #         NOTES:  ---
 #        AUTHOR:  Emerson Rocha <rocha[at]ieee.org>
@@ -29,10 +29,10 @@ CACHE_ITEMS_404="$ROOTDIR/data/cache-wiki-item-dump-404"
 #### Customizable environment variable _________________________________________
 WIKI_URL_ENTITYDATA="${WIKI_URL_ENTITYDATA:-"https://wiki.openstreetmap.org/wiki/Special:EntityData/"}"
 P_START="${P_START:-"1"}"
-P_END="${P_END:-"50"}"
+P_END="${P_END:-"60"}"
 Q_START="${Q_START:-"1"}"
-Q_START="${P_END:-"100"}"
-DELAY="${DELAY:-"5"}"
+Q_END="${Q_END:-"100"}"
+DELAY="${DELAY:-"5"}" # delay in seconds (after download success or error)
 
 # https://meta.wikimedia.org/wiki/User-Agent_policy
 # User-Agent: CoolBot/0.0 (https://example.org/coolbot/; coolbot@example.org) generic-library/0.0
@@ -42,7 +42,7 @@ USERAGENT="${USERAGENT:-"wikibase-wiki-dump-itemsbot/0.1 (https://github.com/fit
 #### Fancy colors constants - - - - - - - - - - - - - - - - - - - - - - - - - -
 tty_blue=$(tput setaf 4)
 tty_green=$(tput setaf 2)
-# tty_red=$(tput setaf 1)
+tty_red=$(tput setaf 1)
 tty_normal=$(tput sgr0)
 
 ## Example
@@ -59,30 +59,29 @@ tty_normal=$(tput sgr0)
 #
 # Globals:
 #   ROOTDIR
-#   SOPHOX_GIT
-#   SOPOX_LOCAL
+#   P_START
+#   P_END
+#   Q_START
+#   Q_END
 # Arguments:
 #
 # Outputs:
 #
 #######################################
 main_loop_p() {
-  trivium_basi="$SOPOX_LOCAL"
+  # trivium_basi="$SOPOX_LOCAL"
   printf "\n\t%40s\n" "${tty_blue}${FUNCNAME[0]} STARTED ${tty_normal}"
 
-  download_wiki_item "P2"
+  printf "\n%s\t%s" "item" "result"
 
-  # if [ -d "$trivium_basi" ]; then
-  #   # echo "local repo exist. Trying to pull ..."
-  #   set -x
-  #   git -C "${trivium_basi}" pull
-  #   set +x
-  # else
-  #   set -x
-  #   mkdir "$trivium_basi"
-  #   git clone "${SOPHOX_GIT}" "$trivium_basi"
-  #   set +x
-  # fi
+  for ((c = P_START; c <= P_END; c++)); do
+    download_wiki_item "P${c}"
+  done
+
+  for ((c = Q_START; c <= Q_END; c++)); do
+    download_wiki_item "Q${c}"
+  done
+
   printf "\t%40s\n" "${tty_green}${FUNCNAME[0]} FINISHED OKAY ${tty_normal}"
 }
 
@@ -102,24 +101,32 @@ main_loop_p() {
 download_wiki_item() {
   item="$1"
   suffix=".nt"
-  printf "\n\t%40s\n" "${tty_blue}${FUNCNAME[0]} STARTED [$WIKI_URL_ENTITYDATA] [$item] ${tty_normal}"
+  # printf "\n\t%40s\n" "${tty_blue}${FUNCNAME[0]} STARTED [$WIKI_URL_ENTITYDATA] [$item] ${tty_normal}"
 
-  if [ ! -f "${CACHE_ITEMS}/${item}${suffix}" ]; then
-    # echo "local repo exist. Trying to pull ..."
-    echo "TODO"
-    echo "${CACHE_ITEMS}/${item}${suffix}"
-    set -x
-    # curl -o "${OSM_PBF_TEST_FILE}" "${OSM_PBF_TEST_DOWNLOAD}"
-    # echo curl --user-agent="'$USERAGENT'" --output "${CACHE_ITEMS}/${item}${suffix}" "${WIKI_URL_ENTITYDATA}${item}${suffix}"
+  if [ -f "${CACHE_ITEMS_404}/${item}${suffix}" ]; then
+    printf "\n%s\t%s" "${item}" "error cached"
+  elif [ -f "${CACHE_ITEMS}/${item}${suffix}" ]; then
+    printf "\n%s\t%s" "${item}" "cached"
+  else
+    EXIT_CODE="0"
+    # set -x
     curl \
       --user-agent "'$USERAGENT'" \
       --silent \
-      --show-error \
+      --fail \
       --output "${CACHE_ITEMS}/${item}${suffix}" \
-      "${WIKI_URL_ENTITYDATA}${item}${suffix}"
-    set +x
+      "${WIKI_URL_ENTITYDATA}${item}${suffix}" || EXIT_CODE=$?
+    # set +x
+    if [ "$EXIT_CODE" != "0" ]; then
+      printf "\n%s\t%s" "${item}" "error"
+      touch "$CACHE_ITEMS_404/${item}${suffix}"
+    else
+      # printf "\n%s" "${tty_green}${item}${tty_normal}"
+      printf "\n%s\t%s" "${item}" "downloaded"
+    fi
+    sleep "$DELAY"
   fi
-  printf "\t%40s\n" "${tty_green}${FUNCNAME[0]} FINISHED OKAY ${tty_normal}"
+  # printf "\t%40s\n" "${tty_green}${FUNCNAME[0]} FINISHED OKAY ${tty_normal}"
 }
 
 #### main ______________________________________________________________________
