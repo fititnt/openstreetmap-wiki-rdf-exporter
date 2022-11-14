@@ -31,8 +31,10 @@ WIKI_URL_ENTITYDATA="${WIKI_URL_ENTITYDATA:-"https://wiki.openstreetmap.org/wiki
 P_START="${P_START:-"1"}"
 P_END="${P_END:-"60"}"
 Q_START="${Q_START:-"1"}"
-Q_END="${Q_END:-"100"}"
+Q_END="${Q_END:-"1000"}"
 DELAY="${DELAY:-"5"}" # delay in seconds (after download success or error)
+RDF_INPUT_EXT="${RDF_EXT:-"ttl"}"
+
 
 # https://meta.wikimedia.org/wiki/User-Agent_policy
 # User-Agent: CoolBot/0.0 (https://example.org/coolbot/; coolbot@example.org) generic-library/0.0
@@ -91,6 +93,7 @@ main_loop_p() {
 # Globals:
 #   CACHE_ITEMS
 #   CACHE_ITEMS_404
+#   RDF_INPUT_EXT
 #   WIKI_URL_ENTITYDATA
 #   DELAY
 # Arguments:
@@ -100,12 +103,12 @@ main_loop_p() {
 #######################################
 download_wiki_item() {
   item="$1"
-  suffix=".nt"
+  # suffix=".nt"
   # printf "\n\t%40s\n" "${tty_blue}${FUNCNAME[0]} STARTED [$WIKI_URL_ENTITYDATA] [$item] ${tty_normal}"
 
-  if [ -f "${CACHE_ITEMS_404}/${item}${suffix}" ]; then
+  if [ -f "${CACHE_ITEMS_404}/${item}.${RDF_INPUT_EXT}" ]; then
     printf "\n%s\t%s" "${item}" "error cached"
-  elif [ -f "${CACHE_ITEMS}/${item}${suffix}" ]; then
+  elif [ -f "${CACHE_ITEMS}/${item}.${RDF_INPUT_EXT}" ]; then
     printf "\n%s\t%s" "${item}" "cached"
   else
     EXIT_CODE="0"
@@ -114,12 +117,12 @@ download_wiki_item() {
       --user-agent "'$USERAGENT'" \
       --silent \
       --fail \
-      --output "${CACHE_ITEMS}/${item}${suffix}" \
-      "${WIKI_URL_ENTITYDATA}${item}${suffix}" || EXIT_CODE=$?
+      --output "${CACHE_ITEMS}/${item}.${RDF_INPUT_EXT}" \
+      "${WIKI_URL_ENTITYDATA}${item}.${RDF_INPUT_EXT}" || EXIT_CODE=$?
     # set +x
     if [ "$EXIT_CODE" != "0" ]; then
       printf "\n%s\t%s" "${item}" "error"
-      touch "$CACHE_ITEMS_404/${item}${suffix}"
+      touch "$CACHE_ITEMS_404/${item}.${RDF_INPUT_EXT}"
     else
       # printf "\n%s" "${tty_green}${item}${tty_normal}"
       printf "\n%s\t%s" "${item}" "downloaded"

@@ -12,6 +12,13 @@ TODO
 - https://www.npmjs.com/package/wikibase-cli (maybe test this?)
 -->
 
+## TODOs
+### `scripts/wikibase-wiki-dump-items.sh`
+- [] Review download time. Likely downloading redundant information.
+  - https://stackoverflow.com/questions/49332839/download-wikidata-single-entity-truthy
+  - https://stackoverflow.com/questions/48359335/wikidata-content-negotiation
+
+
 ## License
 
 [![Public Domain](https://i.creativecommons.org/p/zero/1.0/88x31.png)](UNLICENSE)

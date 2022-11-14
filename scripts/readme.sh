@@ -36,3 +36,15 @@ scripts/cache/sophox/osm2rdf/osm2rdf.py parse data/cache/osm-data-test.osm.pbf d
 
 
 # https://wiki.openstreetmap.org/wiki/Special:EntityData/Q2.nt
+
+rdfpipe --input-format=trig data/cache-wiki-item-dump/P2.nt --output-format=longturtle
+rdfpipe --input-format=trig data/cache-wiki-item-dump/P*.nt --output-format=longturtle > data/cache/P.ttl
+
+rdfpipe --input-format=trig data/cache-wiki-item-dump/P*.ttl --output-format=longturtle > data/cache/Pv2.ttl
+
+# 160 Q => ~400MB ram (because of pretty print output)
+rdfpipe --input-format=trig data/cache-wiki-item-dump/Q*.nt --output-format=longturtle > data/cache/Q.ttl
+
+rdfpipe --input-format=trig data/cache-wiki-item-dump/Q*.ttl --output-format=longturtle > data/cache/Qv2.ttl
+
+# /opt/Protege-5.5.0/run.sh
