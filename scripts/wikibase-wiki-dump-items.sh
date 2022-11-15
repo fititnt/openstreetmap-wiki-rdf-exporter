@@ -47,6 +47,8 @@ set -e
 ROOTDIR="$(pwd)"
 
 #### Customizable environment variable _________________________________________
+# User agent: https://meta.wikimedia.org/wiki/User-Agent_policy
+USERAGENT="${USERAGENT:-"wikibase-wiki-dump-itemsbot/0.1 (https://github.com/fititnt/openstreetmap-wiki-rdf-exporter; rocha(at)ieee.org)"}"
 WIKI_URL_ENTITYDATA="${WIKI_URL_ENTITYDATA:-"https://wiki.openstreetmap.org/wiki/Special:EntityData/"}"
 P_START="${P_START:-"1"}"
 P_END="${P_END:-"60"}"
@@ -57,9 +59,6 @@ CACHE_ITEMS="${CACHE_ITEMS:-"$ROOTDIR/data/cache-wiki-item-dump"}"
 CACHE_ITEMS_404="${CACHE_ITEMS_404:-"$ROOTDIR/data/cache-wiki-item-dump-404"}"
 OUTPUT_DIR="${OUTPUT_DIR:-"$ROOTDIR/data/cache"}"
 OPERATION="${OPERATION:-""}"
-
-# Usert agent used: https://meta.wikimedia.org/wiki/User-Agent_policy
-USERAGENT="${USERAGENT:-"wikibase-wiki-dump-itemsbot/0.1 (https://github.com/fititnt/openstreetmap-wiki-rdf-exporter; rocha(at)ieee.org)"}"
 
 #### internal variables ________________________________________________________
 #### Fancy colors constants - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -200,13 +199,13 @@ rdf_merge_items() {
     exit 1
   fi
 
-  set -x
+  # set -x
   rdfpipe \
     --input-format=ttl \
     --output-format=longturtle \
     "${CACHE_ITEMS}/${itemtype}"*.ttl \
     >"${OUTPUT_DIR}/${itemtype}.ttl"
-  set +x
+  # set +x
 
   printf "\t%40s\n" "${tty_blue} INFO: [hotfixes after formating] ${tty_normal}"
   set -x
@@ -221,8 +220,6 @@ rdf_merge_items() {
   # sed -r works on GNU sed (Not tested on OSX which may need sed -E instead)
   sed -i -r 's/^PREFIX ([a-z]*): <file:\/\//PREFIX \1: <https:\/\//g' "${OUTPUT_DIR}/${itemtype}.ttl"
   set +x
-
-  echo "TODO"
 
   printf "\t%40s\n" "${tty_green}${FUNCNAME[0]} FINISHED OKAY ${tty_normal}"
 }

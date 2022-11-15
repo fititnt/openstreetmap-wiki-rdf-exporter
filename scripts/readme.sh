@@ -25,6 +25,11 @@ echo "cat playbook.sh"
 echo "exiting..."
 echo 1
 
+#### run wikibase-wiki-dump-items.sh ___________________________________________
+# Tested
+./scripts/wikibase-wiki-dump-items.sh
+
+#### If using Sophox ___________________________________________________________
 ## Run this to download repositories and install dependencies
 ./scripts/setup.sh
 
@@ -35,6 +40,7 @@ scripts/cache/sophox/osm2rdf/osm2rdf.py --help
 scripts/cache/sophox/osm2rdf/osm2rdf.py parse data/cache/osm-data-test.osm.pbf data/cache/
 
 
+#### Extra comments (Ignore this part) _________________________________________
 # https://wiki.openstreetmap.org/wiki/Special:EntityData/Q2.nt
 
 rdfpipe --input-format=trig data/cache-wiki-item-dump/P2.nt --output-format=longturtle
@@ -49,5 +55,7 @@ rdfpipe --input-format=trig data/cache-wiki-item-dump/Q*.ttl --output-format=lon
 
 # 500 Q => ~990MB ram
 rdfpipe --input-format=trig data/cache-wiki-item-dump/Q*.ttl --output-format=longturtle > data/cache/Qv3.ttl
+
+# Q1-Q9763 => 1,4GB ram
 
 # /opt/Protege-5.5.0/run.sh
