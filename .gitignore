@@ -6,3 +6,5 @@ data/cache-wiki-item-dump/*
 !data/cache-wiki-item-dump/.gitkeep
 data/cache-wiki-item-dump-404/*
 !data/cache-wiki-item-dump-404/.gitkeep
+*.properties
+catalog-v001.xml
