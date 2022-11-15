@@ -47,4 +47,7 @@ rdfpipe --input-format=trig data/cache-wiki-item-dump/Q*.nt --output-format=long
 
 rdfpipe --input-format=trig data/cache-wiki-item-dump/Q*.ttl --output-format=longturtle > data/cache/Qv2.ttl
 
+# 500 Q => ~990MB ram
+rdfpipe --input-format=trig data/cache-wiki-item-dump/Q*.ttl --output-format=longturtle > data/cache/Qv3.ttl
+
 # /opt/Protege-5.5.0/run.sh

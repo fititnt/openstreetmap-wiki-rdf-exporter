@@ -4,9 +4,18 @@
 #          FILE:  wikibase-wiki-dump-items.sh
 #
 #         USAGE:  ./scripts/wikibase-wiki-dump-items.sh
+#                 DELAY=10 ./scripts/wikibase-wiki-dump-items.sh
+#                 Q_START=1 Q_END=2 ./scripts/wikibase-wiki-dump-items.sh
+#
 #   DESCRIPTION:  ---
 #
-#       OPTIONS:  ---
+#       OPTIONS:  env WIKI_URL_ENTITYDATA=
+#                     http://example.org/wiki/Special:EntityData/
+#                 env DELAY
+#                 env P_START
+#                 env P_END
+#                 env Q_START
+#                 env Q_END
 #
 #  REQUIREMENTS:  - rdfpipe (pip install rdflib)
 #          BUGS:  ---
@@ -31,20 +40,18 @@ WIKI_URL_ENTITYDATA="${WIKI_URL_ENTITYDATA:-"https://wiki.openstreetmap.org/wiki
 P_START="${P_START:-"1"}"
 P_END="${P_END:-"60"}"
 Q_START="${Q_START:-"1"}"
-Q_END="${Q_END:-"1000"}"
+Q_END="${Q_END:-"20000"}"
 DELAY="${DELAY:-"5"}" # delay in seconds (after download success or error)
 RDF_INPUT_EXT="${RDF_EXT:-"ttl"}"
 
-
-# https://meta.wikimedia.org/wiki/User-Agent_policy
-# User-Agent: CoolBot/0.0 (https://example.org/coolbot/; coolbot@example.org) generic-library/0.0
-USERAGENT="${USERAGENT:-"wikibase-wiki-dump-itemsbot/0.1 (https://github.com/fititnt/openstreetmap-wiki-rdf-exporte; rocha(at)ieee.org)"}"
+# Usert agent used: https://meta.wikimedia.org/wiki/User-Agent_policy
+USERAGENT="${USERAGENT:-"wikibase-wiki-dump-itemsbot/0.1 (https://github.com/fititnt/openstreetmap-wiki-rdf-exporter; rocha(at)ieee.org)"}"
 
 #### internal variables ________________________________________________________
 #### Fancy colors constants - - - - - - - - - - - - - - - - - - - - - - - - - -
 tty_blue=$(tput setaf 4)
 tty_green=$(tput setaf 2)
-tty_red=$(tput setaf 1)
+# tty_red=$(tput setaf 1)
 tty_normal=$(tput sgr0)
 
 ## Example
@@ -77,11 +84,12 @@ main_loop_p() {
   printf "\n%s\t%s" "item" "result"
 
   for ((c = P_START; c <= P_END; c++)); do
-    download_wiki_item "P${c}"
+    download_wiki_item "P${c}" ""
   done
 
+  # Q1-Q500 (cached without flavor)
   for ((c = Q_START; c <= Q_END; c++)); do
-    download_wiki_item "Q${c}"
+    download_wiki_item "Q${c}" "?flavor=dump"
   done
 
   printf "\t%40s\n" "${tty_green}${FUNCNAME[0]} FINISHED OKAY ${tty_normal}"
@@ -97,14 +105,18 @@ main_loop_p() {
 #   WIKI_URL_ENTITYDATA
 #   DELAY
 # Arguments:
-#
+#   item        string   (required) Examples: P2 , Q3, (...)
+#   urlsuffix   string   (optional) Example:  ?flavor=dump
 # Outputs:
 #
 #######################################
 download_wiki_item() {
   item="$1"
+  urlsuffix="${2-""}"
   # suffix=".nt"
   # printf "\n\t%40s\n" "${tty_blue}${FUNCNAME[0]} STARTED [$WIKI_URL_ENTITYDATA] [$item] ${tty_normal}"
+
+  # https://www.wikidata.org/wiki/Wikidata:Data_access/pt-br#Less_verbose_RDF_output
 
   if [ -f "${CACHE_ITEMS_404}/${item}.${RDF_INPUT_EXT}" ]; then
     printf "\n%s\t%s" "${item}" "error cached"
@@ -118,7 +130,7 @@ download_wiki_item() {
       --silent \
       --fail \
       --output "${CACHE_ITEMS}/${item}.${RDF_INPUT_EXT}" \
-      "${WIKI_URL_ENTITYDATA}${item}.${RDF_INPUT_EXT}" || EXIT_CODE=$?
+      "${WIKI_URL_ENTITYDATA}${item}.${RDF_INPUT_EXT}${urlsuffix}" || EXIT_CODE=$?
     # set +x
     if [ "$EXIT_CODE" != "0" ]; then
       printf "\n%s\t%s" "${item}" "error"
@@ -127,16 +139,13 @@ download_wiki_item() {
       # printf "\n%s" "${tty_green}${item}${tty_normal}"
       printf "\n%s\t%s" "${item}" "downloaded"
     fi
+    # echo "before delay $DELAY"
     sleep "$DELAY"
+    # echo "after delay"
   fi
   # printf "\t%40s\n" "${tty_green}${FUNCNAME[0]} FINISHED OKAY ${tty_normal}"
 }
 
 #### main ______________________________________________________________________
-echo "TODO"
 
 main_loop_p
-
-# gh_repo_sync_pull_sophox
-# python_requeriments_sophox
-# data_test_download
