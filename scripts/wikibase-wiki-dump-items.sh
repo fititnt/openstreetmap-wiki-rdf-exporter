@@ -4,6 +4,7 @@
 #          FILE:  wikibase-wiki-dump-items.sh
 #
 #         USAGE:  ./scripts/wikibase-wiki-dump-items.sh
+#                 DUMP_LOG=dump.log.tsv ./scripts/wikibase-wiki-dump-items.sh
 #                 DELAY=10 ./scripts/wikibase-wiki-dump-items.sh
 #                 Q_START=1 Q_END=2 ./scripts/wikibase-wiki-dump-items.sh
 #                 OPERATION=merge_p ./scripts/wikibase-wiki-dump-items.sh
@@ -26,6 +27,7 @@
 #                 env CACHE_ITEMS_404
 #                 env CACHE_ITEMS
 #                 env CACHE_ITEMS_404
+#                 env DUMP_LOG
 #
 #  REQUIREMENTS:  - curl
 #                 - rdfpipe (pip install rdflib)
@@ -59,6 +61,7 @@ CACHE_ITEMS="${CACHE_ITEMS:-"$ROOTDIR/data/cache-wiki-item-dump"}"
 CACHE_ITEMS_404="${CACHE_ITEMS_404:-"$ROOTDIR/data/cache-wiki-item-dump-404"}"
 OUTPUT_DIR="${OUTPUT_DIR:-"$ROOTDIR/data/cache"}"
 OPERATION="${OPERATION:-""}"
+DUMP_LOG="${DUMP_LOG:-""}"
 
 #### internal variables ________________________________________________________
 #### Fancy colors constants - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -86,6 +89,7 @@ tty_normal=$(tput sgr0)
 # Globals:
 #    CACHE_ITEMS
 #    CACHE_ITEMS_404
+#    DUMP_LOG
 #
 # Arguments:
 #
@@ -109,6 +113,9 @@ main_loop_items() {
 
   # tab-separated output, START
   printf "\n%s\t%s" "item" "result"
+  if [ -n "$DUMP_LOG" ]; then
+    printf "%s\t%s\n" "item" "result" >"$DUMP_LOG"
+  fi
 
   for ((c = P_START; c <= P_END; c++)); do
     download_wiki_item "P${c}" ""
@@ -131,6 +138,7 @@ main_loop_items() {
 #   RDF_INPUT_EXT
 #   WIKI_URL_ENTITYDATA
 #   DELAY
+#   DUMP_LOG
 # Arguments:
 #   item        string   (required) Examples: P2 , Q3, (...)
 #   urlsuffix   string   (optional) Example:  ?flavor=dump
@@ -147,8 +155,14 @@ download_wiki_item() {
 
   if [ -f "${CACHE_ITEMS_404}/${item}.ttl" ]; then
     printf "\n%s\t%s" "${item}" "error cached"
+    if [ -n "$DUMP_LOG" ]; then
+      printf "%s\t%s\n" "${item}" "error cached" >>"$DUMP_LOG"
+    fi
   elif [ -f "${CACHE_ITEMS}/${item}.ttl" ]; then
     printf "\n%s\t%s" "${item}" "cached"
+    if [ -n "$DUMP_LOG" ]; then
+      printf "%s\t%s\n" "${item}" "cached" >>"$DUMP_LOG"
+    fi
   else
     EXIT_CODE="0"
     # set -x
@@ -161,10 +175,16 @@ download_wiki_item() {
     # set +x
     if [ "$EXIT_CODE" != "0" ]; then
       printf "\n%s\t%s" "${item}" "error"
+      if [ -n "$DUMP_LOG" ]; then
+        printf "%s\t%s\n" "${item}" "error" >>"$DUMP_LOG"
+      fi
       touch "$CACHE_ITEMS_404/${item}.ttl"
     else
       # printf "\n%s" "${tty_green}${item}${tty_normal}"
       printf "\n%s\t%s" "${item}" "downloaded"
+      if [ -n "$DUMP_LOG" ]; then
+        printf "%s\t%s\n" "${item}" "downloaded" >>"$DUMP_LOG"
+      fi
     fi
     # echo "before delay $DELAY"
     sleep "$DELAY"

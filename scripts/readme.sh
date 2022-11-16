@@ -29,6 +29,9 @@ echo 1
 # Tested
 ./scripts/wikibase-wiki-dump-items.sh
 
+# This one will generate the log file
+DUMP_LOG=dump.log.tsv ./scripts/wikibase-wiki-dump-items.sh
+
 #### If using Sophox ___________________________________________________________
 ## Run this to download repositories and install dependencies
 ./scripts/setup.sh
