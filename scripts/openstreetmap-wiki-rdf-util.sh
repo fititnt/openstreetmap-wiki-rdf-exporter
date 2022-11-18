@@ -47,22 +47,15 @@ ROOTDIR="$(pwd)"
 # User agent: https://meta.wikimedia.org/wiki/User-Agent_policy
 USERAGENT="${USERAGENT:-"openstreetmap-wiki-rdf-util.sh/0.1 (https://github.com/fititnt/openstreetmap-wiki-rdf-exporter; rocha(at)ieee.org)"}"
 WIKIBASE_URL_DUMP="${WIKIBASE_URL_DUMP:-"https://wiki.openstreetmap.org/dump/wikibase-rdf.ttl.gz"}"
-# WIKI_URL_ENTITYDATA="${WIKI_URL_ENTITYDATA:-"https://wiki.openstreetmap.org/wiki/Special:EntityData/"}"
-# P_START="${P_START:-"1"}"
-# P_END="${P_END:-"60"}"
-# Q_START="${Q_START:-"1"}"
-# Q_END="${Q_END:-"20000"}"
-# DELAY="${DELAY:-"5"}" # delay in seconds (after download success or error)
-# CACHE_ITEMS="${CACHE_ITEMS:-"$ROOTDIR/data/cache-wiki-item-dump"}"
-# CACHE_ITEMS_404="${CACHE_ITEMS_404:-"$ROOTDIR/data/cache-wiki-item-dump-404"}"
 OUTPUT_DIR="${OUTPUT_DIR:-"$ROOTDIR/data/cache"}"
 FORCE_DOWNLOAD="${FORCE_DOWNLOAD:-""}"
 OPERATION="${OPERATION:-""}"
-DUMP_LOG="${DUMP_LOG:-""}"
+# DUMP_LOG="${DUMP_LOG:-""}"
 
 # Semi-internal envs
 _DUMPFILE_TTL_GZ="${_DUMPFILE:-"wikibase-rdf.ttl.gz"}"
 _DUMPFILE_TTL="${_DUMPFILE:-"wikibase-rdf.ttl"}"
+_DUMPFILE_TTL_FIXME="${_DUMPFILE:-"wikibase-rdf.ttl.fixme"}"
 
 #### internal variables ________________________________________________________
 #### Fancy colors constants - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -91,6 +84,7 @@ tty_normal=$(tput sgr0)
 #   FORCE_DOWNLOAD
 #   _DUMPFILE_TTL_GZ
 #   _DUMPFILE_TTL
+#   _DUMPFILE_TTL_FIXME
 # Arguments:
 #
 # Outputs:
@@ -123,6 +117,8 @@ download_wikibase_dump() {
         --decompress \
         "${OUTPUT_DIR}/${_DUMPFILE_TTL_GZ}" \
         >"${OUTPUT_DIR}/${_DUMPFILE_TTL}"
+
+      touch "${OUTPUT_DIR}/${_DUMPFILE_TTL_FIXME}"
       set +x
     fi
 
@@ -131,15 +127,11 @@ download_wikibase_dump() {
 }
 
 #######################################
-# Download an Wikibase canonical RDF dumpfile GZiped to local cache and
-# decompress
+# Enforce HTTPS protocol namespaces either empty or file://
+# Without this reasoners break.
 #
 # Globals:
-#   USERAGENT
-#   WIKIBASE_URL_DUMP
 #   OUTPUT_DIR
-#   FORCE_DOWNLOAD
-#   _DUMPFILE_TTL_GZ
 #   _DUMPFILE_TTL
 # Arguments:
 #
@@ -147,9 +139,20 @@ download_wikibase_dump() {
 #
 #######################################
 dumpfile_namespace_hotfixes() {
-  printf "\n\t%40s\n" "${tty_blue}${FUNCNAME[0]} STARTED [$WIKIBASE_URL_DUMP] ${tty_normal}"
+  printf "\n\t%40s\n" "${tty_blue}${FUNCNAME[0]} STARTED [${OUTPUT_DIR}/${_DUMPFILE_TTL}] ${tty_normal}"
 
-  echo "TODO"
+  set -x
+
+  # sed -r works on GNU sed (Not tested on OSX which may need sed -E instead)
+  sed -i -r 's/^PREFIX ([a-z0-9]*): <file:\/\//PREFIX \1: <https:\/\//g' "${OUTPUT_DIR}/${_DUMPFILE_TTL}"
+  #   in:  PREFIX p: <file://wiki.openstreetmap.org/prop/>
+  #   out: PREFIX p: <https://wiki.openstreetmap.org/prop/>
+
+  sed -i -r 's/^@prefix ([a-z0-9]*): <\/\//@prefix \1: <https:\/\//g' "${OUTPUT_DIR}/${_DUMPFILE_TTL}"
+  #   in:  @prefix p: <//wiki.openstreetmap.org/prop/> .
+  #   out: @prefix p: <http://wiki.openstreetmap.org/prop/> .
+
+  set +x
 
   printf "\t%40s\n" "${tty_green}${FUNCNAME[0]} FINISHED OKAY ${tty_normal}"
 }
