@@ -139,6 +139,7 @@ main_loop_items() {
 #   WIKI_URL_ENTITYDATA
 #   DELAY
 #   DUMP_LOG
+#   USERAGENT
 # Arguments:
 #   item        string   (required) Examples: P2 , Q3, (...)
 #   urlsuffix   string   (optional) Example:  ?flavor=dump
