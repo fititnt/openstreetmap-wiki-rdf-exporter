@@ -5,6 +5,7 @@
 #
 #         USAGE:  ./scripts/openstreetmap-wiki-rdf-util.sh
 #                 FORCE_DOWNLOAD=1 ./scripts/openstreetmap-wiki-rdf-util.sh
+#                 DUMP_LOG=osmr.log.tsv ./scripts/openstreetmap-wiki-rdf-util.sh
 #
 #   DESCRIPTION:  This shell script will download Wikibase Ps and Qs in
 #                 less efficient way, one by one. Cache individual results
@@ -13,17 +14,10 @@
 #                 in a preditable way (e.g. to allow diffs).
 #                 The merging mecanism may
 #
-#       OPTIONS:  env WIKI_URL_ENTITYDATA=
-#                     http://example.org/wiki/Special:EntityData/
-#                 env DELAY
-#                 env P_START
-#                 env P_END
-#                 env Q_START
-#                 env Q_END
-#                 env CACHE_ITEMS
-#                 env CACHE_ITEMS_404
-#                 env CACHE_ITEMS
-#                 env CACHE_ITEMS_404
+#       OPTIONS:  env WIKIBASE_URL_DUMP
+#                 env FORCE_DOWNLOAD
+#                 env OUTPUT_DIR
+#                 env DUMP_LOG
 #                 env DUMP_LOG
 #
 #  REQUIREMENTS:  - curl
@@ -50,7 +44,11 @@ WIKIBASE_URL_DUMP="${WIKIBASE_URL_DUMP:-"https://wiki.openstreetmap.org/dump/wik
 OUTPUT_DIR="${OUTPUT_DIR:-"$ROOTDIR/data/cache"}"
 FORCE_DOWNLOAD="${FORCE_DOWNLOAD:-""}"
 OPERATION="${OPERATION:-""}"
-# DUMP_LOG="${DUMP_LOG:-""}"
+DUMP_LOG="${DUMP_LOG:-""}" # osmr.log.tsv
+
+# command line
+EXE_JENA_ARQ="${EXE_JENA_ARQ:-"arq"}"
+EXE_JENA_RIOT="${EXE_JENA_RIOT:-"riot"}"
 
 # Semi-internal envs
 _DUMPFILE_TTL_GZ="${_DUMPFILE:-"wikibase-rdf.ttl.gz"}"
@@ -95,8 +93,14 @@ download_wikibase_dump() {
 
   if [ -f "${OUTPUT_DIR}/${_DUMPFILE_TTL_GZ}" ] && [ -z "${FORCE_DOWNLOAD}" ]; then
     printf "%s\t%s\n" "${_DUMPFILE_TTL_GZ}" "cached"
+    if [ -n "$DUMP_LOG" ]; then
+      printf "%s\t%s\n" "${_DUMPFILE_TTL_GZ}" "cached" >>"${DUMP_LOG}"
+    fi
   else
     printf "%s\t%s\n" "${_DUMPFILE_TTL_GZ}" "downloading"
+    if [ -n "$DUMP_LOG" ]; then
+      printf "%s\t%s\n" "${_DUMPFILE_TTL_GZ}" "downloading" >>"${DUMP_LOG}"
+    fi
     EXIT_CODE="0"
     set -x
     curl \
@@ -109,6 +113,9 @@ download_wikibase_dump() {
 
     if [ "$EXIT_CODE" != "0" ]; then
       printf "%s\t%s\n" "${_DUMPFILE_TTL_GZ}" "download error"
+      if [ -n "$DUMP_LOG" ]; then
+        printf "%s\t%s\n" "${_DUMPFILE_TTL_GZ}" "download error" >>"${DUMP_LOG}"
+      fi
     else
       set -x
       gzip \
@@ -119,6 +126,10 @@ download_wikibase_dump() {
         >"${OUTPUT_DIR}/${_DUMPFILE_TTL}"
 
       touch "${OUTPUT_DIR}/${_DUMPFILE_TTL_FIXME}"
+      printf "%s\t%s\n" "${_DUMPFILE_TTL_GZ}" "fixme"
+      if [ -n "$DUMP_LOG" ]; then
+        printf "%s\t%s\n" "${_DUMPFILE_TTL_GZ}" "fixme" >>"${DUMP_LOG}"
+      fi
       set +x
     fi
 
@@ -141,20 +152,53 @@ download_wikibase_dump() {
 dumpfile_namespace_hotfixes() {
   printf "\n\t%40s\n" "${tty_blue}${FUNCNAME[0]} STARTED [${OUTPUT_DIR}/${_DUMPFILE_TTL}] ${tty_normal}"
 
-  set -x
+  if [ -f "${OUTPUT_DIR}/${_DUMPFILE_TTL_FIXME}" ]; then
+    if [ -n "$DUMP_LOG" ]; then
+      printf "%s\t%s\n" "${_DUMPFILE_TTL}" "hotfixing" >>"${DUMP_LOG}"
+    fi
+    set -x
 
-  # sed -r works on GNU sed (Not tested on OSX which may need sed -E instead)
-  sed -i -r 's/^PREFIX ([a-z0-9]*): <file:\/\//PREFIX \1: <https:\/\//g' "${OUTPUT_DIR}/${_DUMPFILE_TTL}"
-  #   in:  PREFIX p: <file://wiki.openstreetmap.org/prop/>
-  #   out: PREFIX p: <https://wiki.openstreetmap.org/prop/>
+    # sed -r works on GNU sed (Not tested on OSX which may need sed -E instead)
+    sed -i -r 's/^PREFIX ([a-z0-9]*): <file:\/\//PREFIX \1: <https:\/\//g' "${OUTPUT_DIR}/${_DUMPFILE_TTL}"
+    #   in:  PREFIX p: <file://wiki.openstreetmap.org/prop/>
+    #   out: PREFIX p: <https://wiki.openstreetmap.org/prop/>
 
-  sed -i -r 's/^@prefix ([a-z0-9]*): <\/\//@prefix \1: <https:\/\//g' "${OUTPUT_DIR}/${_DUMPFILE_TTL}"
-  #   in:  @prefix p: <//wiki.openstreetmap.org/prop/> .
-  #   out: @prefix p: <http://wiki.openstreetmap.org/prop/> .
+    sed -i -r 's/^@prefix ([a-z0-9]*): <\/\//@prefix \1: <https:\/\//g' "${OUTPUT_DIR}/${_DUMPFILE_TTL}"
+    #   in:  @prefix p: <//wiki.openstreetmap.org/prop/> .
+    #   out: @prefix p: <http://wiki.openstreetmap.org/prop/> .
 
-  set +x
+    rm "${OUTPUT_DIR}/${_DUMPFILE_TTL_FIXME}"
+
+    set +x
+  else
+    printf "%s\t%s\n" "${_DUMPFILE_TTL_GZ}" "no change"
+    if [ -n "$DUMP_LOG" ]; then
+      printf "%s\t%s\n" "${_DUMPFILE_TTL}" "no hotfix applied" >>"${DUMP_LOG}"
+    fi
+  fi
 
   printf "\t%40s\n" "${tty_green}${FUNCNAME[0]} FINISHED OKAY ${tty_normal}"
+}
+
+#######################################
+# Run some SPARQL queries against local RDF file
+#
+# Globals:
+#   OUTPUT_DIR
+#   _DUMPFILE_TTL
+# Arguments:
+#
+# Outputs:
+#
+#######################################
+run_query_tests() {
+  echo "TODO"
+  # "$EXE_JENA_ARQ" --help
+
+  # QUERY='SELECT ?x WHERE { ?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  "John Smith" }'
+
+  # "$EXE_JENA_ARQ" --data="${OUTPUT_DIR}/${_DUMPFILE_TTL}" --query="${QUERY}"
+  "$EXE_JENA_RIOT" --validate "${OUTPUT_DIR}/${_DUMPFILE_TTL}"
 }
 
 #### main ______________________________________________________________________
@@ -165,6 +209,10 @@ fi
 
 if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "dump_ns_hotfixes" ]; then
   dumpfile_namespace_hotfixes
+fi
+
+if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "test_simple" ]; then
+  run_query_tests
 fi
 
 # if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "merge_p" ]; then

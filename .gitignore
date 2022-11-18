@@ -3,6 +3,7 @@ scripts/cache/*
 data/cache/*
 !data/cache/.gitkeep
 dump.log.tsv
+osmr.log.tsv
 data/cache-wiki-item-dump/*
 !data/cache-wiki-item-dump/.gitkeep
 data/cache-wiki-item-dump-404/*
