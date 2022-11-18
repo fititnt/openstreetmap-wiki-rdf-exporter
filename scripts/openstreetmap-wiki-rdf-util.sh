@@ -181,6 +181,26 @@ dumpfile_namespace_hotfixes() {
 }
 
 #######################################
+# Enforce HTTPS protocol namespaces either empty or file://
+# Without this reasoners break.
+#
+# Globals:
+#   OUTPUT_DIR
+#   _DUMPFILE_TTL
+# Arguments:
+#
+# Outputs:
+#
+#######################################
+dumpfile_validate_basic() {
+  printf "\n\t%40s\n" "${tty_blue}${FUNCNAME[0]} STARTED [${OUTPUT_DIR}/${_DUMPFILE_TTL}] ${tty_normal}"
+
+  "$EXE_JENA_RIOT" --validate "${OUTPUT_DIR}/${_DUMPFILE_TTL}"
+
+  printf "\t%40s\n" "${tty_green}${FUNCNAME[0]} FINISHED OKAY ${tty_normal}"
+}
+
+#######################################
 # Run some SPARQL queries against local RDF file
 #
 # Globals:
@@ -212,7 +232,8 @@ if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "dump_ns_hotfixes" ]; then
 fi
 
 if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "test_simple" ]; then
-  run_query_tests
+  dumpfile_validate_basic
+  # run_query_tests
 fi
 
 # if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "merge_p" ]; then
