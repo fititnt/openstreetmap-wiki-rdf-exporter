@@ -1,0 +1,12 @@
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX schema: <http://schema.org/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX wdt: <https://wiki.openstreetmap.org/prop/direct/>
+
+SELECT DISTINCT ?label ?desc WHERE {
+#   ?y skos:prefLabel "tag"@en;
+#     schema:description ?desc.
+  ?y a wikibase:Property;
+    skos:prefLabel ?label;
+    schema:description ?desc.
+}

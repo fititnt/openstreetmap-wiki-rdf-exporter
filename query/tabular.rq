@@ -1,0 +1,24 @@
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX schema: <http://schema.org/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX wdt: <https://wiki.openstreetmap.org/prop/direct/>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+
+SELECT * WHERE {
+
+  # This service will pull in the external data from 
+  SERVICE wikibase:tabular {
+    # URL of the data: https://gist.github.com/nyurik/bc0e305248a66cfac565349e41f1ae99
+    # Use the "RAW" link
+    bd:serviceParam wikibase:url <https://gist.githubusercontent.com/nyurik/bc0e305248a66cfac565349e41f1ae99/raw/fbb0d844a8cb068faec9b90adecdae16e99da26f/museums-in-JC.csv> .
+
+    # Our data contains a header line, allowing us to use "tabular:columnName" instead of "tabular:index"
+    bd:serviceParam wikibase:firstRowIsHeader true .
+
+    # Get these columns into correspondingly named variables
+    # ?url tabular:url 'uri' .
+    # ?type tabular:type 'string' .
+    # ?id tabular:id 'integer' .
+    # ?name tabular:name 'string' .
+  }
+}

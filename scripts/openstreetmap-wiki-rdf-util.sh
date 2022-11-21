@@ -233,6 +233,12 @@ if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "test_simple" ]; then
   # run_query_tests
 fi
 
+# arq --query=query/by-name.rq --data=data/cache/wikibase-rdf.ttl
+# time arq --query=query/by-name.rq --data=data/cache/wikibase-rdf.ttl
+
+# time arq --query=query/is-p.rq --data=data/cache/wikibase-rdf.ttl --results=TSV
+# time arq --query=query/tabular.rq --data=data/cache/wikibase-rdf.ttl --results=TSV
+
 # if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "merge_p" ]; then
 #   # echo "TODO merge_p"
 #   rdf_merge_items "P"
