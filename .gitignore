@@ -10,3 +10,6 @@ data/cache-wiki-item-dump-404/*
 !data/cache-wiki-item-dump-404/.gitkeep
 *.properties
 catalog-v001.xml
+
+# fuseki-server
+run/

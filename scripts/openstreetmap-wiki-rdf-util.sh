@@ -239,12 +239,7 @@ fi
 # time arq --query=query/is-p.rq --data=data/cache/wikibase-rdf.ttl --results=TSV
 # time arq --query=query/tabular.rq --data=data/cache/wikibase-rdf.ttl --results=TSV
 
-# if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "merge_p" ]; then
-#   # echo "TODO merge_p"
-#   rdf_merge_items "P"
-# fi
-
-# if [ -z "${OPERATION}" ] || [ "${OPERATION}" = "merge_q" ]; then
-#   # echo "TODO merge_q"
-#   rdf_merge_items "Q"
-# fi
+### fuseki server
+## https://jena.apache.org/documentation/fuseki2/fuseki-quick-start.html
+# /opt/apache-jena-fuseki/fuseki-server --file data/cache/wikibase-rdf.ttl /osm
+# Navegador em http://localhost:3030/
