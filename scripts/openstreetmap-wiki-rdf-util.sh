@@ -7,12 +7,8 @@
 #                 FORCE_DOWNLOAD=1 ./scripts/openstreetmap-wiki-rdf-util.sh
 #                 DUMP_LOG=osmr.log.tsv ./scripts/openstreetmap-wiki-rdf-util.sh
 #
-#   DESCRIPTION:  This shell script will download Wikibase Ps and Qs in
-#                 less efficient way, one by one. Cache individual results
-#                 in disk (including errors). At the end it will merge
-#                 the output into single files, already well formated
-#                 in a preditable way (e.g. to allow diffs).
-#                 The merging mecanism may
+#   DESCRIPTION:  Wikibase RDF dump script optimized for use of OpenStreetMap
+#                 Data Items.
 #
 #       OPTIONS:  env WIKIBASE_URL_DUMP
 #                 env FORCE_DOWNLOAD
@@ -22,6 +18,7 @@
 #
 #  REQUIREMENTS:  - curl
 #                 - gzip
+#                 - riot (Apache Jena)
 #
 #          BUGS:  ---
 #         NOTES:  ---
@@ -30,7 +27,7 @@
 #       LICENSE:  Public Domain dedication
 #                 SPDX-License-Identifier: Unlicense
 #       VERSION:  v1.0
-#       CREATED:  2022-11-14 10:38 UTC Based on wikibase-wiki-dump-items.sh
+#       CREATED:  2022-11-18 07:19 UTC Based on wikibase-wiki-dump-items.sh
 #      REVISION:  ---
 #===============================================================================
 set -e
