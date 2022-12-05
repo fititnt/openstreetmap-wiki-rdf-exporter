@@ -13,3 +13,5 @@ catalog-v001.xml
 
 # fuseki-server
 run/
+
+scripts/osm2rdf2022.py

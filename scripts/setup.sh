@@ -120,3 +120,34 @@ data_test_download() {
 gh_repo_sync_pull_sophox
 python_requeriments_sophox
 data_test_download
+
+
+# cd /tmp
+# wget https://github.com/Sophox/osm2rdf/releases/download/v0.2.0/osm2rdf.gz
+# gunzip osm2rdf.gz
+# chmod +x osm2rdf
+# cp osm2rdf /workspace/bin/
+# # requires more disk space than GitHub Runners have :(
+
+
+# https://download.geofabrik.de/south-america/brazil/sul.html
+# curl --output /tmp/sul-latest.osm.pbf https://download.geofabrik.de/south-america/brazil/sul-latest.osm.pbf 
+
+
+# curl --output ~/Downloads/brazil-latest.osm.pbf https://download.geofabrik.de/south-america/brazil-latest.osm.pbf
+
+# - https://github.com/osmcode/osmium-tool/releases
+#   - https://packages.debian.org/source/osmium-tool
+# sudo apt-get install osmium-tool
+
+
+# osmium tags-filter ~/Downloads/brazil-latest.osm.pbf
+
+# w/highway=primary
+
+# osmium tags-filter -R -o notes.osm.pbf berlin.osm.pbf note
+# osmium tags-filter -R -o ~/Downloads/brazil-latest-notes.osm ~/Downloads/brazil-latest.osm.pbf note
+
+
+# osmium tags-filter -R -o ~/Downloads/brazil-latest-impossible.osm ~/Downloads/brazil-latest.osm.pbf w/highway r/maxspee=200
+# osmium tags-filter -R -o ~/Downloads/brazil-latest-impossible.osm ~/Downloads/brazil-latest.osm.pbf w/highway r/maxspee=200
