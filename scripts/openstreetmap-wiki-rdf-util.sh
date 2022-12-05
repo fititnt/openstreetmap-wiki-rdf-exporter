@@ -243,3 +243,10 @@ fi
 ## https://jena.apache.org/documentation/fuseki2/fuseki-quick-start.html
 # /opt/apache-jena-fuseki/fuseki-server --file data/cache/wikibase-rdf.ttl /osm
 # Navegador em http://localhost:3030/
+
+# arq --query=query/by-name.rq --data=data/cache/wikibase-rdf.ttl
+# arq --query=query/data-items-p-as-relations-tabular.rq --data=data/cache/wikibase-rdf.ttl --results=TSV > data/cache/data-items-p.tsv
+
+# arq --query=query/data-items-q-as-relations-tabular.rq --data=data/cache/wikibase-rdf.ttl --results=TSV > data/cache/data-items-q.tsv
+
+# rdfpipe --output-format=longturtle data/cache/wikibase-rdf.ttl > data/cache/wikibase-rdf_longturtle.ttl

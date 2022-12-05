@@ -1,0 +1,47 @@
+# @see https://wiki.openstreetmap.org/wiki/User:Roland.olbricht/Data_Items_as_Relations
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX schema: <http://schema.org/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX wdt: <https://wiki.openstreetmap.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT 
+  (STRAFTER(STR(?item), "entity/") AS ?item_q)
+  ?key #P10
+  ?p10
+  ?key_with_lang #P10
+  ?validation_regex # P13
+  ?desc
+  ?label__ar
+  ?label__en
+  ?desc__ar
+  ?desc__en
+  # (GROUP_CONCAT(?label ; SEPARATOR = "|||") AS ?label_X)
+  # (GROUP_CONCAT(?desc ; SEPARATOR = "|||") AS ?desc_X)
+WHERE {
+  ?item a wikibase:Item;
+      # skos:prefLabel ?label;
+      # schema:description ?desc;
+  .
+  OPTIONAL { 
+    ?item wdt:P10 ?p10 .
+    ?p10 rdfs:label ?key_with_lang .
+    filter (lang(?key_with_lang) = "en").
+    # NOTE: actually Data items contains keys translated
+    BIND (STR(?key_with_lang)  AS ?key)
+  }
+  OPTIONAL { 
+    ?item wdt:P13 ?validation_regex .
+  }
+  OPTIONAL { ?item skos:prefLabel ?label filter (lang(?label) = "en"). }
+  OPTIONAL { ?item schema:description ?desc filter (lang(?desc) = "en"). }
+  OPTIONAL { ?item skos:prefLabel ?label__ar filter (lang(?label__ar) = "ar"). }
+  OPTIONAL { ?item skos:prefLabel ?label__en filter (lang(?label__en) = "en"). }
+  OPTIONAL { ?item schema:description ?desc__ar filter (lang(?desc__ar) = "ar"). }
+  OPTIONAL { ?item schema:description ?desc__en filter (lang(?desc__en) = "en"). }
+  BIND(xsd:integer(strafter(str(?item), 'Q')) as ?id_numeric) .
+}
+ORDER BY ASC(?id_numeric)
+# to strip the en from "languate tag"en: https://stackoverflow.com/questions/35889050/get-string-without-the-language-tag
