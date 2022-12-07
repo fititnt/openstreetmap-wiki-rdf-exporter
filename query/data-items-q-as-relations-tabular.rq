@@ -1,3 +1,9 @@
+# This is an initial draft of query to extract tabular data from
+# https://wiki.openstreetmap.org/dump/wikibase-rdf.ttl.gz
+#
+# A command line tool like Apache Jena can be used like this:
+# arq --query=query/data-items-q-as-relations-tabular.rq --data=data/cache/wikibase-rdf.ttl --results=TSV > data/cache/data-items-q.tsv
+#
 # @see https://wiki.openstreetmap.org/wiki/User:Roland.olbricht/Data_Items_as_Relations
 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

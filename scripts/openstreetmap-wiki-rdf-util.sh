@@ -248,5 +248,6 @@ fi
 # arq --query=query/data-items-p-as-relations-tabular.rq --data=data/cache/wikibase-rdf.ttl --results=TSV > data/cache/data-items-p.tsv
 
 # arq --query=query/data-items-q-as-relations-tabular.rq --data=data/cache/wikibase-rdf.ttl --results=TSV > data/cache/data-items-q.tsv
+# arq --query=query/data-items-q-as-relations-tabular.rq --data=data/cache/wikibase-rdf_longturtle.ttl --results=TSV > data/cache/data-items-q.tsv
 
 # rdfpipe --output-format=longturtle data/cache/wikibase-rdf.ttl > data/cache/wikibase-rdf_longturtle.ttl
